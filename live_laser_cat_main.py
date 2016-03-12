@@ -11,10 +11,29 @@ access_token_secret = "uCbdHeJ6jZkX2Bg7EAteKofhjYAnO5MP7h8xbMR6kuWVi"
 auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
 auth.set_access_token(access_token, access_token_secret)
 
-#run API
+#create api access point
 api = tweepy.API(auth)
-public_tweets = api.home_timeline()
 
-#print all tweets
-for tweet in public_tweets:
-    print (tweet.text)
+#post test pic
+def postTestPic():
+    api.update_with_media("content\\cat_test.jpg", "test status")
+
+#stream class
+class MyStreamListener(tweepy.StreamListener):
+    
+    #print stream
+    def on_status(self, status):
+        print(status.text.encode('utf-8'))
+    
+    #handle error codes
+    def on_error(self, status_code):
+        if (status_code == 420):
+            return False
+
+#create stream
+myStreamListener = MyStreamListener()
+myStream = tweepy.Stream(auth = api.auth, listener = myStreamListener)
+
+#myStream.filter(follow="@LiveLaserCat", track=['test'], async=True)
+
+#postTestPic()
