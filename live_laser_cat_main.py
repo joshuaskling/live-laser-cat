@@ -18,13 +18,13 @@ auth.set_access_token(access_token, access_token_secret)
 api = tweepy.API(auth)
 
 #get top posts from showerthoughts and aww
-def getRedditContent():
+def getRedditContent(user):
     print("Getting Reddit content")
     r = praw.Reddit(user_agent="livelasercat")
 
     #get submissions
     print("Getting image...")
-    submissions = r.get_random_submission('aww')
+    submissions = r.get_random_submission('earthporn')
 
     url = submissions.url
     print (url)
@@ -67,6 +67,14 @@ def getRedditContent():
     image.save("temp.jpg")
     image.close()
 
+    #send photo
+    postRedditPhoto(user)
+    print ("Photo sent!")
+
+#post reddit photo
+def postRedditPhoto(user):
+    input = user.decode('utf-8')
+    api.update_with_media("temp.jpg", "Shower thoughts for @" + input)
 
 #post cat photo (currently in test mode)
 def postNewPhoto(user):
@@ -79,7 +87,8 @@ class MyStreamListener(tweepy.StreamListener):
     #print stream
     def on_status(self, status):
         print(status.author.screen_name.encode('utf-8') + status.source.encode('utf-8') + status.text.encode('utf-8'))
-        postNewPhoto(status.author.screen_name.encode('utf-8'))
+        #postNewPhoto(status.author.screen_name.encode('utf-8'))
+        getRedditContent(status.author.screen_name.encode('utf-8'))
     
     #handle error codes
     def on_error(self, status_code):
@@ -87,7 +96,7 @@ class MyStreamListener(tweepy.StreamListener):
             print ("test")
             return False
             
-getRedditContent()
+#getRedditContent()
 
 #create stream
 myStreamListener = MyStreamListener()
