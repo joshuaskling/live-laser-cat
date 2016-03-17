@@ -2,7 +2,10 @@ import tweepy, praw, requests
 from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
-import servo_driver, camera_driver
+#import servo_driver, camera_driver
+
+#temp user
+tempUser = "JoshuaKling".encode('utf-8')
 
 #set OAuth information
 consumer_key = "qNfUHr4XUyoaeTapyMyk7quYG"
@@ -24,12 +27,16 @@ def getRedditContent(user):
 
     #get submissions
     print("Getting image...")
-    submissions = r.get_random_submission('earthporn')
+    submissions = r.get_subreddit('aww').get_hot(limit=10)
 
-    url = submissions.url
-    print (url)
-    #for x in submissions:
-    #    url = x.url
+    #url = submissions.url
+    #print (url)
+    for x in submissions:
+        print (str(x.url))
+        if ("imgur.com/" in x.url and ".jpg" in x.url):
+
+            url = x.url
+            print (url)
 
     #download image to local machine
     image = open("temp.jpg", "wb")
@@ -95,8 +102,8 @@ class MyStreamListener(tweepy.StreamListener):
         if (status_code == 420):
             print ("test")
             return False
-            
-#getRedditContent()
+
+getRedditContent(tempUser)
 
 #create stream
 myStreamListener = MyStreamListener()
