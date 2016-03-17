@@ -1,4 +1,4 @@
-import tweepy, praw, requests
+import tweepy, praw, requests, textwrap, random
 from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
@@ -27,20 +27,20 @@ def getRedditContent(user):
 
     #get submissions
     print("Getting image...")
-    submissions = r.get_subreddit('aww').get_hot(limit=10)
+    submissions = r.get_subreddit('earthporn').get_hot(limit=20)
+    images = []
 
     #url = submissions.url
     #print (url)
     for x in submissions:
-        print (str(x.url))
+
         if ("imgur.com/" in x.url and ".jpg" in x.url):
+            images.append(x.url)
+            #url = x.url
 
-            url = x.url
-            print (url)
-
-    #download image to local machine
+    #download random image to local machine
     image = open("temp.jpg", "wb")
-    image.write(requests.get(url).content)
+    image.write(requests.get(images[random.randrange(0, len(images))]).content)
     image.close()
     print("Image downloaded")
 
@@ -49,25 +49,41 @@ def getRedditContent(user):
     print("Getting showerthought...")
     submissions = r.get_random_submission('showerthoughts')
 
-    #for item in submissions:
-    #    text = item
-    text = str(submissions).split(":: ")
-    text = text[1]
-    print (text)
-    #print ("Showerthought downloaded")
+    text = submissions.title
+    print ("Showerthought downloaded")
 
     #apply text to picture
     print ("Applying text to image...")
 
-    #define fonts
-    font = ImageFont.truetype("C:\Windows\\Fonts\\Calibri.ttf",40)
-    textColor = (255, 255, 255)
-    textPosition = (100,100)
-
-    #open image and draw
+    #open image
     image = Image.open("temp.jpg")
+
+    #chop text for wrapping
+    width, height = image.size
+    text = textwrap.wrap(text, int(width/30), break_long_words=False)
+    print (text)
+
+    #define fonts
+    font = ImageFont.truetype("C:\Windows\\Fonts\\Tahoma.ttf", 50)
+    textColor = (random.randrange(200,255), random.randrange(200,255), random.randrange(200,255))
+    shadowColor = (0,0,0)
+
+    offset = height/15
+    textPositionx = 100
+    textPositiony = height - 400
+
     draw = ImageDraw.Draw(image)
-    draw.text(textPosition, text, fill=textColor, font=font)
+
+    #apply text to image
+    for x in text:
+        #apply border
+        draw.text((textPositionx-1, textPositiony), x, font=font, fill=shadowColor)
+        draw.text((textPositionx+1, textPositiony), x, font=font, fill=shadowColor)
+        draw.text((textPositionx, textPositiony-1), x, font=font, fill=shadowColor)
+        draw.text((textPositionx, textPositiony+1), x, font=font, fill=shadowColor)
+
+        draw.text((textPositionx, textPositiony), x, fill=textColor, font=font)
+        textPositiony = textPositiony + offset
     del draw
 
     #save image
@@ -103,7 +119,7 @@ class MyStreamListener(tweepy.StreamListener):
             print ("test")
             return False
 
-getRedditContent(tempUser)
+#getRedditContent(tempUser)
 
 #create stream
 myStreamListener = MyStreamListener()
